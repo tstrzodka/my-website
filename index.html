@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vokabeltrainer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #1a73e8;
+            font-size: 28px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 20px;
+        }
+
+        .section {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .file-input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: #1a73e8;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1557b0;
+        }
+
+        .btn-primary:disabled {
+            background: #a0c4f1;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #e8eaed;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d2d5d9;
+        }
+
+        .btn-success {
+            background: #0d904f;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #0a7340;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
+
+        .file-info {
+            color: #666;
+            font-size: 14px;
+            padding: 8px 0;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .radio-option:hover {
+            border-color: #1a73e8;
+            background: #f8f9ff;
+        }
+
+        .radio-option input[type="radio"] {
+            accent-color: #1a73e8;
+            width: 18px;
+            height: 18px;
+        }
+
+        .radio-option input[type="radio"]:checked + span {
+            color: #1a73e8;
+            font-weight: 600;
+        }
+
+        /* Quiz screen */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #1a73e8;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .question-label {
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .question-word {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 24px;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .answer-input:focus {
+            border-color: #1a73e8;
+        }
+
+        .answer-input.correct {
+            border-color: #0d904f;
+            background: #f0faf4;
+        }
+
+        .answer-input.wrong {
+            border-color: #d93025;
+            background: #fef0ef;
+        }
+
+        .feedback {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            min-height: 24px;
+        }
+
+        .feedback.correct {
+            color: #0d904f;
+        }
+
+        .feedback.wrong {
+            color: #d93025;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .button-row .btn {
+            flex: 1;
+        }
+
+        /* Results */
+        .result-summary {
+            text-align: center;
+            padding: 24px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .result-score {
+            font-size: 48px;
+            font-weight: 700;
+            color: #1a73e8;
+        }
+
+        .result-label {
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .wrong-list {
+            margin-bottom: 24px;
+        }
+
+        .wrong-list h3 {
+            margin-bottom: 12px;
+            color: #d93025;
+        }
+
+        .wrong-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: #fef0ef;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        .wrong-item .given {
+            color: #d93025;
+            font-size: 13px;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .spacer {
+            height: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Startbildschirm -->
+        <div id="screen-start" class="screen active">
+            <h1>Vokabeltrainer</h1>
+
+            <div class="section">
+                <label>CSV-Datei laden</label>
+                <div class="file-input-wrapper">
+                    <button class="btn btn-secondary" onclick="document.getElementById('file-input').click()">
+                        Datei auswählen...
+                    </button>
+                    <input type="file" id="file-input" accept=".csv,.txt" onchange="loadFile(event)">
+                </div>
+                <div id="file-info" class="file-info"></div>
+            </div>
+
+            <div class="section">
+                <label>Abfragerichtung</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="direction" value="de-en" checked>
+                        <span>Deutsch → Englisch</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="direction" value="en-de">
+                        <span>Englisch → Deutsch</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="direction" value="mixed">
+                        <span>Gemischt</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="section">
+                <label>Reihenfolge</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="order" value="sequential" checked>
+                        <span>Reihenfolge aus Datei</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="order" value="random">
+                        <span>Zufällig</span>
+                    </label>
+                </div>
+            </div>
+
+            <button id="start-btn" class="btn btn-primary btn-block" disabled onclick="startQuiz()">
+                Quiz starten
+            </button>
+        </div>
+
+        <!-- Abfrage-Bildschirm -->
+        <div id="screen-quiz" class="screen">
+            <h1>Vokabeltrainer</h1>
+
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+            </div>
+            <div id="progress-text" class="progress-text"></div>
+
+            <div id="question-label" class="question-label"></div>
+            <div id="question-word" class="question-word"></div>
+
+            <input type="text" id="answer-input" class="answer-input" placeholder="Antwort eingeben..."
+                   onkeydown="handleKeydown(event)" autocomplete="off">
+
+            <div id="feedback" class="feedback"></div>
+
+            <div class="button-row">
+                <button id="btn-check" class="btn btn-primary btn-block" onclick="checkAnswer()">
+                    Prüfen
+                </button>
+                <button id="btn-next" class="btn btn-success btn-block" onclick="nextQuestion()" style="display:none">
+                    Weiter
+                </button>
+            </div>
+        </div>
+
+        <!-- Ergebnis-Bildschirm -->
+        <div id="screen-results" class="screen">
+            <h1>Ergebnis</h1>
+
+            <div class="result-summary">
+                <div id="result-score" class="result-score"></div>
+                <div id="result-label" class="result-label"></div>
+            </div>
+
+            <div id="wrong-list" class="wrong-list"></div>
+
+            <div id="wrong-actions" style="display:none">
+                <label>Falsche Vokabeln:</label>
+                <div class="spacer"></div>
+                <div class="button-row">
+                    <button class="btn btn-secondary" onclick="saveWrongAsCSV()">Als CSV speichern</button>
+                    <button class="btn btn-primary" onclick="retryWrong()">Nochmal abfragen</button>
+                </div>
+                <div class="spacer"></div>
+                <button class="btn btn-success btn-block" onclick="saveAndRetry()">Speichern & nochmal abfragen</button>
+            </div>
+
+            <div class="spacer"></div>
+            <div class="spacer"></div>
+            <button class="btn btn-secondary btn-block" onclick="backToStart()">Zurück zum Start</button>
+        </div>
+    </div>
+
+    <script>
+        let vocabulary = [];
+        let quizItems = [];
+        let currentIndex = 0;
+        let wrongAnswers = [];
+        let answered = false;
+        let currentDirection = '';
+        let currentOrder = '';
+
+        function loadFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                vocabulary = [];
+                const lines = text.split(/\r?\n/);
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (!trimmed) continue;
+                    const parts = trimmed.split('=');
+                    if (parts.length >= 2) {
+                        const en = parts[0].trim();
+                        const de = parts.slice(1).join('=').trim();
+                        if (en && de) {
+                            vocabulary.push({ en, de });
+                        }
+                    }
+                }
+
+                const info = document.getElementById('file-info');
+                if (vocabulary.length > 0) {
+                    info.textContent = `"${file.name}" geladen: ${vocabulary.length} Vokabeln`;
+                    info.style.color = '#0d904f';
+                    document.getElementById('start-btn').disabled = false;
+                } else {
+                    info.textContent = 'Keine gültigen Vokabeln gefunden. Format: englisch=deutsch';
+                    info.style.color = '#d93025';
+                    document.getElementById('start-btn').disabled = true;
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function startQuiz() {
+            currentDirection = document.querySelector('input[name="direction"]:checked').value;
+            currentOrder = document.querySelector('input[name="order"]:checked').value;
+
+            quizItems = vocabulary.map(v => {
+                let dir;
+                if (currentDirection === 'mixed') {
+                    dir = Math.random() < 0.5 ? 'de-en' : 'en-de';
+                } else {
+                    dir = currentDirection;
+                }
+                return { ...v, dir };
+            });
+
+            if (currentOrder === 'random') {
+                quizItems = shuffle(quizItems);
+            }
+
+            currentIndex = 0;
+            wrongAnswers = [];
+            showScreen('screen-quiz');
+            showQuestion();
+        }
+
+        function startQuizWith(items) {
+            quizItems = items.map(v => {
+                let dir;
+                if (currentDirection === 'mixed') {
+                    dir = Math.random() < 0.5 ? 'de-en' : 'en-de';
+                } else {
+                    dir = currentDirection;
+                }
+                return { ...v, dir };
+            });
+
+            if (currentOrder === 'random') {
+                quizItems = shuffle(quizItems);
+            }
+
+            currentIndex = 0;
+            wrongAnswers = [];
+            showScreen('screen-quiz');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const item = quizItems[currentIndex];
+            const total = quizItems.length;
+            const progress = ((currentIndex) / total) * 100;
+
+            document.getElementById('progress-fill').style.width = progress + '%';
+            document.getElementById('progress-text').textContent = `${currentIndex + 1} / ${total}`;
+
+            if (item.dir === 'de-en') {
+                document.getElementById('question-label').textContent = 'Übersetze ins Englische:';
+                document.getElementById('question-word').textContent = item.de;
+            } else {
+                document.getElementById('question-label').textContent = 'Übersetze ins Deutsche:';
+                document.getElementById('question-word').textContent = item.en;
+            }
+
+            const input = document.getElementById('answer-input');
+            input.value = '';
+            input.className = 'answer-input';
+            input.disabled = false;
+            input.focus();
+
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('btn-check').style.display = '';
+            document.getElementById('btn-next').style.display = 'none';
+
+            answered = false;
+        }
+
+        function normalize(str) {
+            return str.trim().toLowerCase().replace(/\s+/g, ' ');
+        }
+
+        function checkAnswer() {
+            if (answered) return;
+
+            const item = quizItems[currentIndex];
+            const input = document.getElementById('answer-input');
+            const userAnswer = normalize(input.value);
+            const correctAnswer = item.dir === 'de-en' ? item.en : item.de;
+            const alternatives = correctAnswer.split('/').map(a => normalize(a));
+            const isCorrect = alternatives.some(alt => userAnswer === alt);
+
+            answered = true;
+            input.disabled = true;
+
+            const feedback = document.getElementById('feedback');
+            if (isCorrect) {
+                input.className = 'answer-input correct';
+                feedback.textContent = 'Richtig!';
+                feedback.className = 'feedback correct';
+            } else {
+                input.className = 'answer-input wrong';
+                feedback.textContent = `Falsch! Richtige Antwort: ${correctAnswer}`;
+                feedback.className = 'feedback wrong';
+                wrongAnswers.push({
+                    en: item.en,
+                    de: item.de,
+                    givenAnswer: input.value
+                });
+            }
+
+            document.getElementById('btn-check').style.display = 'none';
+            document.getElementById('btn-next').style.display = '';
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < quizItems.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function handleKeydown(event) {
+            if (event.key === 'Enter') {
+                if (!answered) {
+                    checkAnswer();
+                } else {
+                    nextQuestion();
+                }
+            }
+        }
+
+        function showResults() {
+            const total = quizItems.length;
+            const correct = total - wrongAnswers.length;
+            const percent = Math.round((correct / total) * 100);
+
+            document.getElementById('result-score').textContent = `${percent}%`;
+            document.getElementById('result-label').textContent = `${correct} von ${total} richtig`;
+
+            const wrongList = document.getElementById('wrong-list');
+            const wrongActions = document.getElementById('wrong-actions');
+
+            if (wrongAnswers.length > 0) {
+                let html = '<h3>Falsch beantwortet:</h3>';
+                for (const w of wrongAnswers) {
+                    html += `<div class="wrong-item">
+                        <span>${w.en} = ${w.de}</span>
+                        <span class="given">(deine Antwort: ${w.givenAnswer || '—'})</span>
+                    </div>`;
+                }
+                wrongList.innerHTML = html;
+                wrongActions.style.display = '';
+            } else {
+                wrongList.innerHTML = '<p style="text-align:center;color:#0d904f;font-weight:600;">Alles richtig! Sehr gut!</p>';
+                wrongActions.style.display = 'none';
+            }
+
+            document.getElementById('progress-fill').style.width = '100%';
+            showScreen('screen-results');
+        }
+
+        function saveWrongAsCSV() {
+            const lines = wrongAnswers.map(w => `${w.en}=${w.de}`);
+            const content = lines.join('\n');
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'falsche_vokabeln.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function retryWrong() {
+            const items = wrongAnswers.map(w => ({ en: w.en, de: w.de }));
+            startQuizWith(items);
+        }
+
+        function saveAndRetry() {
+            saveWrongAsCSV();
+            retryWrong();
+        }
+
+        function backToStart() {
+            showScreen('screen-start');
+        }
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+    </script>
+</body>
+</html>
